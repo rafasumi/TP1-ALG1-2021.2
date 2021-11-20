@@ -2,7 +2,6 @@ CC = g++
 CXXFLAGS = -std=c++11 -g -Wall
 
 INCLUDE_FOLDER = ./include/
-BIN_FOLDER = ./bin/
 OBJ_FOLDER = ./obj/
 SRC_FOLDER = ./src/
 
@@ -18,4 +17,4 @@ all: $(OBJ)
 	$(CC) $(CXXFLAGS) -o $(TARGET) $(OBJ)
 
 clean:
-	@rm -rf $(OBJ_FOLDER)* $(BIN_FOLDER)* $(TARGET)
+	@rm -rf $(OBJ_FOLDER)* $(TARGET)
