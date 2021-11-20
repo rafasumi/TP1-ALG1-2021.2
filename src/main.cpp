@@ -10,11 +10,14 @@
 #include "Store.hpp"
 #include "utils.hpp"
 
+// Função main do programa. É responsável pela leitura do arquivo de input, por instanciar objetos e variáveis
+// e pela chamada de funções necessárias para a realização do casamento entre lojas e clientes
 int main(int argc, char const* argv[]) {
   std::ifstream inputFile(argv[1]);
   const char* delim = " ";
   std::string line;
 
+  // Faz a leitura da primeira linha, que contém o tamanho do grid
   getline (inputFile, line);
   int n = std::stoi(std::strtok(const_cast<char*>(line.c_str()), delim));
   int m = std::stoi(std::strtok(NULL, delim));
@@ -22,10 +25,12 @@ int main(int argc, char const* argv[]) {
   Grid grid = Grid(n, m);
 
   int capacity, x, y;
-  getline (inputFile, line);
-  int storeQty = std::stoi(line);
+  // Vetor que contém todas as lojas informadas no input
   std::vector<Store*> stores;
   
+  // Faz a leitura das linhas referentes às lojas
+  getline (inputFile, line);
+  int storeQty = std::stoi(line);
   for (int i = 0; i < storeQty; i++) {
     getline (inputFile, line);
     capacity = std::stoi(std::strtok(const_cast<char*>(line.c_str()), delim));
@@ -36,13 +41,20 @@ int main(int argc, char const* argv[]) {
     stores.push_back(store);
   }
 
-  std::multimap<float, int, std::greater<float>> clientPreferencesMap;
+  // Foi escolhida a estrutura de multimap pois ela insere os elementos de forma ordenada
+  // considerando uma determinada chave, no caso o ticket de cada cliente. Dessa forma, a
+  // lista de preferência fica ordenada e, como a forma de desempate é a ordem de inserção,
+  // os clientes com menor ID terão maior preferência.
+  std::multimap<float, int, std::greater<float>> clientsPreferenceMap;
 
   int age;
   std::string state, payment;
+  // Vetor que contém todos os clientes informados no input
+  std::vector<Client*> clients;
+
+  // Faz a leitura das linhas referentes aos clientes
   getline (inputFile, line);
   int clientQty = std::stoi(line);
-  std::vector<Client*> clients;
 
   for (int i = 0; i < clientQty; i++) {
     getline (inputFile, line);
@@ -53,20 +65,22 @@ int main(int argc, char const* argv[]) {
     y = std::stoi(std::strtok(NULL, delim));
 
     Client* client = new Client(i, age, state, payment, x, y, storeQty);
-    client->setPreferences(grid, stores);
+    // Calcula as distâncias entre o cliente e todas as lojas do problema
+    client->setDistances(grid, stores);
     clients.push_back(client);
 
-    clientPreferencesMap.insert(std::pair<float, int>(client->getTicket(), client->getId()));
+    clientsPreferenceMap.insert(std::pair<float, int>(client->getTicket(), client->getId()));
   }
 
   inputFile.close();
 
-  std::vector<int> clientPreferences;
-  for (auto it : clientPreferencesMap) {
-    clientPreferences.push_back(it.second);
+  // O vetor extrai os IDs do multimap clientsPreferenceMap para serem usados no casamento estável 
+  std::vector<int> clientsPreferenceList;
+  for (auto it : clientsPreferenceMap) {
+    clientsPreferenceList.push_back(it.second);
   }
 
-  std::vector<std::vector<int>> matching = utils::stableMatching(stores, clients, clientPreferences);
+  std::vector<std::vector<int>> matching = utils::stableMatching(stores, clients, clientsPreferenceList);
 
   utils::printResults(matching);
 

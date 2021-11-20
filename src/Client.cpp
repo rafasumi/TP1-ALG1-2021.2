@@ -10,11 +10,11 @@ Client::Client(int id, int age, std::string state, std::string payment, int x, i
   this->coord._y = y;
   this->ticket = calculateTicket();
   this->scheduledStore = -1;
-  this->storePreferences = new int[storeQty];
+  this->storeDistances = new int[storeQty];
 }
 
 Client::~Client() {
-  delete[] this->storePreferences;
+  delete[] this->storeDistances;
 }
 
 float Client::calculateTicket() {
@@ -36,14 +36,14 @@ int Client::getScheduledStore() {
   return this->scheduledStore;
 }
 
-int* Client::getPreferences() {
-  return this->storePreferences;
+int* Client::getDistances() {
+  return this->storeDistances;
 }
 
-void Client::setPreferences(Grid grid, std::vector<Store*> stores) {
+void Client::setDistances(Grid grid, std::vector<Store*> stores) {
   for (Store* store : stores) {
     int shortestPath = grid.findShortestPath(this->coord, store->getCoord());
-    storePreferences[store->getId()] = shortestPath;
+    storeDistances[store->getId()] = shortestPath;
   }
 }
 

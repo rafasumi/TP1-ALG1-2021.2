@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iostream>
 
+// Função auxiliar que troca a loja na qual um cliente está agendado.
 void swapStores(std::vector<std::vector<int>>* matching, int oldStore, int newStore, int clientId) {
   auto it = std::find(matching->at(oldStore).begin(), matching->at(oldStore).end(), clientId);
   matching->at(oldStore).erase(it);
@@ -11,6 +12,7 @@ void swapStores(std::vector<std::vector<int>>* matching, int oldStore, int newSt
   matching->at(newStore).push_back(clientId);
 }
 
+// Função auxiliar que verifica se uma determinada loja já está na fila do casamento estável.
 bool notInQueue(std::deque<Store*> queue, Store* store) {
   return std::find(queue.begin(), queue.end(), store) == queue.end();
 }
@@ -20,40 +22,55 @@ std::vector<std::vector<int>> utils::stableMatching(
   std::vector<Client*> clients,
   std::vector<int> clientPreferences
 ) {
+  // O array matchedClients é utilizado para manter um registro dos clientes que já tem alocação.
+  // Se a posição i do array for verdadeira, então o cliente de ID i já está alocado
   bool* matchedClients = new bool[clients.size()];
   std::memset(matchedClients, false, clients.size());
 
+  // Vetor de vetores que é utilizado para representar o casamento
   std::vector<std::vector<int>> matching(stores.size());
 
+  // Fila (double-ended queue) que contém as lojas que ainda devem/podem fazer propostas
   std::deque<Store*> storesQueue;
   for (Store* store : stores)
     storesQueue.push_back(store);
 
-  while(!storesQueue.empty()) {
-    Store* store = storesQueue.front(); 
+  while (!storesQueue.empty()) {
+    Store* store = storesQueue.front();
+    // Verifica se a loja da iteração atual já atingiu o seu limite máximo de clientes ou se já propôs
+    // para todos os clientes. Se sim, a loja é retirada da fila e o while vai para a próxima iteração
     if (store->isFull() || (store->proposedClientsQty() >= (int)clientPreferences.size())) {
       storesQueue.pop_front();
       continue;
     }
 
+    // Pega o cliente com maior preferência para o qual a loja ainda não propôs. Esse índice é obtido pelo
+    // atributo proposedClients de Store, já que se a loja propôs para i clientes, o próximo cliente para o
+    // qual ela não propôs está na posição i+1
     int clientId = clientPreferences.at(store->proposedClientsQty());
     Client* client = clients.at(clientId);
 
+    // Incrementa o valor de proposedClients para a loja em questão
     store->proposeToClient();
-    bool storeIsCloser = client->getPreferences()[store->getId()] < client->getPreferences()[client->getScheduledStore()];
+
+    // Estas duas variáveis booleanas representam as condições para as quais um cliente deve aceitar trocar de loja
+    bool storeIsCloser = client->getDistances()[store->getId()] < client->getDistances()[client->getScheduledStore()];
     bool sameDistanceButLowerId = 
-      client->getPreferences()[store->getId()] == client->getPreferences()[client->getScheduledStore()] &&
+      client->getDistances()[store->getId()] == client->getDistances()[client->getScheduledStore()] &&
       store->getId() < client->getScheduledStore();
 
+    // Se o cliente ainda não foi alocado, ele imediatamente aceita a proposta da loja
     if (!matchedClients[clientId]) {
       matching[store->getId()].push_back(clientId);
-      
+
       store->scheduleClient(client);
       
       matchedClients[clientId] = true;
     } else if (storeIsCloser || sameDistanceButLowerId) {
+      // Se pelo menos uma das duas condições é válida, o cliente troca para a loja da iteração atual
       swapStores(&matching, client->getScheduledStore(), store->getId(), clientId);
 
+      // A loja é adicionada à fila se já não estiver nela
       stores.at(client->getScheduledStore())->removeClient(clientId);
       if (notInQueue(storesQueue, stores.at(client->getScheduledStore())))
         storesQueue.push_back(stores.at(client->getScheduledStore()));

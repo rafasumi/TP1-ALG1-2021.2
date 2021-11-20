@@ -1,6 +1,7 @@
 #ifndef COORD_H
 #define COORD_H
 
+// Classe que representa a coordenada de uma entidade (loja ou cliente) no grid de tamanho NxM.
 class Coord {
   public:
     Coord() {
