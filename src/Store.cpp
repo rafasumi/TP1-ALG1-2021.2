@@ -18,22 +18,17 @@ Coord Store::getCoord() {
   return this->coord;
 }
 
-std::vector<int> Store::getScheduledClients() {
-  return this->scheduledClients;
-}
-
 int Store::proposedClientsQty() {
   return this->proposedClients;
 }
 
 void Store::scheduleClient(Client* client) {
-  this->scheduledClients.push_back(client->getId());
+  this->scheduledClients++;
   client->scheduleStore(this->id);
 }
 
-void Store::removeClient(int clientId) {
-  std::vector<int>::iterator it = std::find(this->scheduledClients.begin(), this->scheduledClients.end(), clientId);
-  this->scheduledClients.erase(it);
+void Store::removeClient() {
+  this->scheduledClients--;
 }
 
 void Store::proposeToClient() {
@@ -41,5 +36,5 @@ void Store::proposeToClient() {
 }
 
 bool Store::isFull() {
-  return (int)this->scheduledClients.size() == capacity;
+  return this->scheduledClients == capacity;
 }

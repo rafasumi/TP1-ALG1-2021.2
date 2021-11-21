@@ -12,14 +12,13 @@ class Store {
 
     int getId();
     Coord getCoord();
-    std::vector<int> getScheduledClients();
     int proposedClientsQty();
 
-    // Adiciona um cliente no vetor scheduledClients.
+    // Adiciona um cliente no vetor scheduledClients e atualiza o agendamento do cliente.
     void scheduleClient(Client* client);
 
-    // Remove um cliente do vetor scheduledClients a patir de seu ID.
-    void removeClient(int clientId);
+    // Decrementa o valor de scheduledClients.
+    void removeClient();
 
     // Indica que está sendo feita uma proposta a um cliente. Equivale a incrementar a variável proposedClients.
     void proposeToClient();
@@ -32,8 +31,8 @@ class Store {
     int capacity;
     Coord coord;
 
-    // Vetor com os IDs de todos os clientes agendados para a loja.
-    std::vector<int> scheduledClients;
+    // Contador para o número de clientes agendados para a loja.
+    int scheduledClients;
 
     // Atributo que indica a quantidade de clientes para os quais uma loja já fez proposta.
     int proposedClients;
