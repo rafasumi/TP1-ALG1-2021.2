@@ -93,6 +93,4 @@ void utils::printResults(std::vector<std::vector<int>> matching) {
 
     std::cout << std::endl;
   }
-
-  std::cout << std::endl;
 }
